@@ -1,0 +1,365 @@
+:root {
+    /* Основные цвета сайта */
+    --bg-color: #1d242a;
+    --post-bg: #313a3f;
+    --post-bg-2: #263137;
+    --text-color: #f9feff;
+    --post-shadow: #06090b;
+    --button-text: #3db29e;
+    
+    /* Глобальный border-radius */
+    --border-radius: 5px;
+    --border-block: 1px solid rgba(249, 254, 255, 0.1)
+}
+
+html {
+    /* Стабилизирует ширину из-за полосы прокрутки */
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 10px;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+}
+
+/* Навигация */
+.nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(249, 254, 255, 0.2);
+}
+
+.nav-link {
+    color: var(--button-text);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+    background-color: rgba(61, 178, 158, 0.2);
+}
+
+.nav-link.active {
+    color: var(--bg-color);
+    background-color: var(--button-text);
+}
+
+/* Заголовок страницы */
+.page-title {
+    font-size: 28px;
+    margin: 0 15px 25px 15px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.section-title {
+    font-size: 22px;
+    margin: 30px 15px 20px 15px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.post {
+    background: var(--post-bg);
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px var(--post-shadow);
+    border: 1px solid rgba(249, 254, 255, 0.1);
+    overflow: hidden; /* Обрезаем содержимое по границам с закругленными углами */
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 0;
+    background-color: var(--post-bg-2);
+    gap: 15px; /* Расстояние между заголовком и временем */
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    border-bottom: 1px solid rgba(249, 254, 255, 0.1);
+}
+
+.post-title {
+    font-size: 18px;
+    margin: 0;
+    font-weight: bold;
+    flex: 1; /* Заголовок занимает оставшееся пространство */
+}
+
+.post-time {
+    font-size: 12px;
+    color: rgba(249, 254, 255, 0.6);
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.4;
+    flex-shrink: 0; /* Время не сжимается */
+}
+
+/* Скрываем полный формат, показываем раздельный везде */
+.post-time-full {
+    display: none;
+}
+
+.post-date {
+    display: block;
+}
+
+.post-time-only {
+    display: block;
+    margin-top: 2px;
+}
+
+/* На мобильных немного уменьшаем размер */
+@media (max-width: 768px) {
+    .post-time {
+        font-size: 11px;
+    }
+    
+    .post-header {
+        gap: 10px;
+    }
+}
+
+.post-content {
+    font-size: 15px;
+    line-height: 1.5em;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    margin: 15px;
+}
+
+.post-content.collapsed {
+    max-height: 4.5em; /* 3 строки по 1.5em line-height */
+}
+
+/* Класс .collapsed используется в JS как состояние; стили не требуются */
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: var(--button-text);
+    cursor: pointer;
+    margin: 15px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0px;
+    display: none; /* Скрываем по умолчанию, показываем через JS если нужно */
+    margin-left: auto;
+}
+
+.toggle-btn:hover {
+    text-decoration: underline;
+}
+
+/* Формы */
+.form-title {
+    font-size: 20px;
+    margin: 15px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.post-form {
+    margin-top: 0;
+}
+
+.form-group {
+    margin: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(249, 254, 255, 0.3);
+    border-radius: var(--border-radius);
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    background-color: rgba(249, 254, 255, 0.05);
+    color: var(--text-color);
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--button-text);
+    background-color: rgba(249, 254, 255, 0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: rgba(249, 254, 255, 0.5);
+}
+
+.form-textarea {
+    resize: none; /* отключаем ручное растягивание */
+    min-height: 40px;
+    overflow: hidden; /* убираем внутренний скролл, чтобы авто-рост выглядел чисто */
+    line-height: 1.5em;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0px 0px 0px;
+}
+
+/* Кнопки */
+.btn {
+    padding: 10px 0px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: inline-block;
+    background: none;
+    color: var(--button-text);
+}
+
+.btn.btn-primary {
+    padding: 0px;
+    margin: 0px 15px 15px 15px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.8;
+}
+
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: none;
+    color: var(--button-text);
+}
+
+.btn-primary:hover {
+    opacity: 0.8;
+}
+
+.btn-secondary {
+    background: none;
+    color: var(--button-text);
+    margin: 0px 15px 15px 15px;
+}
+
+.btn-secondary:hover {
+    opacity: 0.8;
+}
+
+.btn-edit {
+    background: none;
+    color: var(--button-text);
+}
+
+.btn-edit:hover {
+    opacity: 0.8;
+}
+
+.btn-danger {
+    background: none;
+    color: var(--button-text);
+}
+
+.btn-danger:hover {
+    opacity: 0.8;
+}
+
+.edit-form-container {
+    margin-top: 0;
+    /* padding: 15px; */
+    border-top: 1px solid rgba(249, 254, 255, 0.1);
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    max-height: 0;
+}
+
+.edit-form-container.expanded {
+    max-height: 5000px; /* Достаточно большое значение для плавной анимации */
+}
+
+.post-actions {
+    margin-top: 0px;
+    display: flex;
+    gap: 10px;
+    padding: 0 15px 0px 15px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    max-height: 100px;
+    opacity: 1;
+}
+
+.post-actions.hidden {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 15px;
+    margin-top: 0;
+}
+
+/* Flash сообщения */
+.flash-message {
+    padding: 12px 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.post-flash-container {
+    margin-bottom: 0;
+    /* padding: 15px 15px 0 15px; */
+    min-height: 0;
+    overflow: hidden;
+}
+
+.post-flash {
+    margin-bottom: 0 !important;
+    margin-top: 0;
+}
+
+.flash-success {
+    background-color: rgba(61, 178, 158, 0.2);
+    color: var(--button-text);
+    border: 1px solid var(--button-text);
+}
+
+.flash-error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #f8d7da;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+}

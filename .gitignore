@@ -1,0 +1,12 @@
+# Виртуальное окружение
+venv/
+
+# Файлы кэша Python
+__pycache__/
+*.pyc
+
+# SQLite база (если есть)
+instance/*.sqlite3
+
+# SSL ключи
+ssl_key/

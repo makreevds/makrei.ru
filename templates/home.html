@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ url_for('main.index') }}" class="nav-link active">Главная</a>
+            <a href="{{ url_for('main.blog') }}" class="nav-link">Блог</a>
+            <a href="{{ url_for('main.login') }}" class="nav-link">Админ</a>
+        </nav>
+
+        <h1 class="page-title">Добро пожаловать!</h1>
+
+        <div class="post">
+            <div class="post-header">
+                <h2 class="post-title">О сайте</h2>
+            </div>
+            <div class="post-content">
+                <p>Это минималистичный блог на Flask.</p>
+                <p>Используйте навигацию для перехода к блогу или админ-панели.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+

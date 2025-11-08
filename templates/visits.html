@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логи посещений</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ url_for('main.index') }}" class="nav-link">Главная</a>
+            <a href="{{ url_for('main.blog') }}" class="nav-link">Блог</a>
+            <a href="{{ url_for('main.admin') }}" class="nav-link">Админ</a>
+            <a href="{{ url_for('main.visits') }}" class="nav-link active">Логи</a>
+            <a href="{{ url_for('main.logout') }}" class="nav-link">Выйти</a>
+        </nav>
+
+        <h1 class="page-title">Логи посещений</h1>
+
+        <div style="margin-top:2em; margin-bottom:1.5em; text-align:right;">
+            <form method="POST" action="{{ url_for('main.clear_visits') }}" style="display:inline" onsubmit="return confirm('Удалить все логи посещений?');">
+                <button type="submit" class="btn btn-danger">Очистить логи</button>
+            </form>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="visits-table">
+                <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>IP-адрес</th>
+                        <th>User-Agent</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for v in visits %}
+                    <tr>
+                        <td>{{ v.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                        <td>{{ v.ip }}</td>
+                        <td title="{{ v.user_agent }}">{{ v.user_agent[:40] ~ ('...' if v.user_agent|length > 40 else '') }}</td>
+                        <td>{{ v.path }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4">Нет данных о посещениях</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+</html>

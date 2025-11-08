@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Блог</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ url_for('main.index') }}" class="nav-link">Главная</a>
+            <a href="{{ url_for('main.blog') }}" class="nav-link active">Блог</a>
+            <a href="{{ url_for('main.login') }}" class="nav-link">Админ</a>
+        </nav>
+
+        <h1 class="page-title">Блог</h1>
+
+        {% for post in posts %}
+        <div class="post">
+            <div class="post-header">
+                <h2 class="post-title">{{ post.title }}</h2>
+                <span class="post-time">
+                    <span class="post-time-full">{{ post.published_at.strftime('%d.%m.%Y, %H:%M') }}</span>
+                    <span class="post-date">{{ post.published_at.strftime('%d.%m.%y') }}</span>
+                    <span class="post-time-only">{{ post.published_at.strftime('%H:%M') }}</span>
+                </span>
+            </div>
+            <div class="post-content collapsed">
+                {{ post.text }}
+            </div>
+            <button class="toggle-btn" style="display: none;">Развернуть</button>
+        </div>
+        {% else %}
+        <div class="post">
+            <div class="post-header">
+                <h2 class="post-title">Пока нет записей</h2>
+                <span class="post-time">—</span>
+            </div>
+            <div class="post-content">
+                Добавьте первую запись через админ-панель.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ url_for('main.index') }}" class="nav-link">Главная</a>
+            <a href="{{ url_for('main.blog') }}" class="nav-link">Блог</a>
+            <a href="{{ url_for('main.admin') }}" class="nav-link{% if request.endpoint=='main.admin' %} active{% endif %}">Админ</a>
+            <a href="{{ url_for('main.visits') }}" class="nav-link{% if request.endpoint=='main.visits' %} active{% endif %}">Логи</a>
+            <a href="{{ url_for('main.logout') }}" class="nav-link">Выйти</a>
+        </nav>
+
+        <h1 class="page-title">Админ-панель</h1>
+
+        <!-- Форма создания нового поста -->
+        <div class="post">
+            <h2 class="form-title">Создать новый пост</h2>
+            <form method="POST" action="{{ url_for('main.create_post') }}" class="post-form">
+                <div class="form-group">
+                    <label for="new-title" class="form-label">Заголовок</label>
+                    <textarea id="new-title" name="title" class="form-textarea auto-resize" rows="1" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="new-text" class="form-label">Текст</label>
+                    <textarea id="new-text" name="text" class="form-textarea auto-resize" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать пост</button>
+            </form>
+        </div>
+
+        <!-- Список существующих постов -->
+        <h2 class="section-title">Существующие посты</h2>
+        {% for post in posts %}
+        <div class="post" id="post-{{ post.id }}">
+            <!-- Контейнер для flash-сообщений возле поста -->
+            <div class="post-flash-container" id="flash-post-{{ post.id }}"></div>
+            
+            <div class="post-header">
+                <h2 class="post-title">{{ post.title }}</h2>
+                <span class="post-time">
+                    <span class="post-time-full">{{ post.published_at.strftime('%d.%m.%Y, %H:%M') }}</span>
+                    <span class="post-date">{{ post.published_at.strftime('%d.%m.%y') }}</span>
+                    <span class="post-time-only">{{ post.published_at.strftime('%H:%M') }}</span>
+                </span>
+            </div>
+            <div class="post-content">
+                {{ post.text }}
+            </div>
+            
+            <!-- Форма редактирования -->
+            <div class="edit-form-container" id="edit-form-{{ post.id }}">
+                <form method="POST" action="{{ url_for('main.edit_post', post_id=post.id) }}" class="post-form">
+                    <div class="form-group">
+                        <label for="title-{{ post.id }}" class="form-label">Заголовок</label>
+                        <textarea id="title-{{ post.id }}" name="title" class="form-textarea auto-resize" rows="1" required>{{ post.title }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="text-{{ post.id }}" class="form-label">Текст</label>
+                        <textarea id="text-{{ post.id }}" name="text" class="form-textarea auto-resize" rows="5" required>{{ post.text }}</textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-secondary toggle-edit-btn" data-post-id="{{ post.id }}">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Кнопки управления -->
+            <div class="post-actions">
+                <button type="button" class="btn btn-edit toggle-edit-btn" data-post-id="{{ post.id }}">Редактировать</button>
+                <form method="POST" action="{{ url_for('main.delete_post', post_id=post.id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?');">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="post">
+            <div class="post-header">
+                <h2 class="post-title">Нет постов</h2>
+                <span class="post-time">—</span>
+            </div>
+            <div class="post-content">
+                Создайте первый пост используя форму выше.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <script type="application/json" id="flash-messages-data">
+        [
+            {% for category, message in messages %}
+            {"category": "{{ category }}", "message": {{ message|tojson }}}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
+    {% endif %}
+    {% endwith %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем flash-сообщения из данных
+            var messagesDataEl = document.getElementById('flash-messages-data');
+            var messages = [];
+            if (messagesDataEl) {
+                try {
+                    messages = JSON.parse(messagesDataEl.textContent);
+                } catch (e) {
+                    console.error('Ошибка парсинга flash сообщений:', e);
+                }
+            }
+            
+            // Получаем post_id из URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var postId = urlParams.get('post_id');
+            
+            if (messages.length > 0) {
+                if (postId) {
+                    // Находим пост и контейнер для сообщения
+                    var postElement = document.getElementById('post-' + postId);
+                    var flashContainer = document.getElementById('flash-post-' + postId);
+                    
+                    if (postElement && flashContainer) {
+                        // Сворачиваем форму редактирования, если она открыта
+                        var form = document.getElementById('edit-form-' + postId);
+                        if (form && form.classList.contains('expanded')) {
+                            function collapseFormLocal(form) {
+                                form.style.maxHeight = form.scrollHeight + 'px';
+                                form.offsetHeight;
+                                form.classList.remove('expanded');
+                                form.style.maxHeight = '0';
+                                
+                                // Показываем кнопки действий обратно
+                                var postContainer = form.closest('.post');
+                                if (postContainer) {
+                                    var actions = postContainer.querySelector('.post-actions');
+                                    if (actions) {
+                                        actions.classList.remove('hidden');
+                                    }
+                                }
+                            }
+                            collapseFormLocal(form);
+                            
+                            // Показываем сообщение после сворачивания формы
+                            setTimeout(function() {
+                                showFlashMessage(flashContainer, messages[0]);
+                            }, 400); // Задержка равна времени анимации сворачивания
+                        } else {
+                            // Если форма не открыта, показываем сразу
+                            showFlashMessage(flashContainer, messages[0]);
+                        }
+                    }
+                } else {
+                    // Для создания поста или других случаев без post_id - показываем возле формы создания
+                    var createPostForm = document.querySelector('.post:first-of-type');
+                    if (createPostForm) {
+                        var flashContainer = document.createElement('div');
+                        flashContainer.className = 'post-flash-container';
+                        flashContainer.id = 'flash-create';
+                        createPostForm.insertBefore(flashContainer, createPostForm.firstChild);
+                        showFlashMessage(flashContainer, messages[0]);
+                    }
+                }
+            }
+            
+            // Функция для показа flash-сообщения с плавной анимацией
+            function showFlashMessage(container, messageData) {
+                var flashDiv = document.createElement('div');
+                flashDiv.className = 'flash-message flash-' + messageData.category + ' post-flash';
+                flashDiv.textContent = messageData.message;
+                
+                // Устанавливаем начальное состояние для анимации
+                flashDiv.style.opacity = '0';
+                flashDiv.style.transform = 'translateY(-10px)';
+                flashDiv.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                
+                container.appendChild(flashDiv);
+                
+                // Запускаем анимацию появления
+                setTimeout(function() {
+                    flashDiv.style.opacity = '1';
+                    flashDiv.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Автоматически скрываем через 3 секунды
+                setTimeout(function() {
+                    flashDiv.style.opacity = '0';
+                    flashDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(function() {
+                        if (flashDiv.parentNode) {
+                            flashDiv.parentNode.removeChild(flashDiv);
+                        }
+                    }, 400);
+                }, 3000);
+            }
+            
+            // Обработка кликов по кнопкам редактирования
+            // Функция для плавного раскрытия/свёртывания формы
+            function expandForm(form) {
+                // Сначала устанавливаем реальную высоту для анимации
+                form.style.maxHeight = form.scrollHeight + 'px';
+                form.classList.add('expanded');
+            }
+
+            function collapseForm(form) {
+                // Устанавливаем текущую высоту перед анимацией
+                form.style.maxHeight = form.scrollHeight + 'px';
+                // Форсируем рефлоу
+                form.offsetHeight;
+                // Убираем класс и устанавливаем max-height в 0
+                form.classList.remove('expanded');
+                form.style.maxHeight = '0';
+            }
+
+            document.querySelectorAll('.toggle-edit-btn').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const postId = this.getAttribute('data-post-id');
+                    const form = document.getElementById('edit-form-' + postId);
+                    if (!form) {
+                        console.error('Форма не найдена для post ID:', postId);
+                        return;
+                    }
+                    
+                    const isExpanded = form.classList.contains('expanded');
+                    
+                    // Переключаем видимость формы
+                    if (isExpanded) {
+                        collapseForm(form);
+                    } else {
+                        expandForm(form);
+                        // Авто-ресайз текстовых полей после раскрытия
+                        setTimeout(function() {
+                            form.querySelectorAll('.auto-resize').forEach(function(ta) {
+                                ta.style.height = 'auto';
+                                ta.style.height = ta.scrollHeight + 'px';
+                            });
+                        }, 10);
+                    }
+
+                    // Скрываем/показываем блок действий поста
+                    const postContainer = this.closest('.post');
+                    if (postContainer) {
+                        const actions = postContainer.querySelector('.post-actions');
+                        if (actions) {
+                            if (isExpanded) {
+                                actions.classList.remove('hidden');
+                            } else {
+                                actions.classList.add('hidden');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Авто-ресайз для всех .auto-resize
+            function autoResize(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            }
+
+            document.querySelectorAll('.auto-resize').forEach(function(ta) {
+                // Начальная подгонка высоты
+                autoResize(ta);
+                // Подгонка при вводе
+                ta.addEventListener('input', function() {
+                    autoResize(ta);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
